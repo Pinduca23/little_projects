@@ -1,8 +1,15 @@
-import secrets, string
+import secrets
+import string
 
 everything = string.ascii_letters + string.digits
 length = int(input("Required size of password: "))
-password = ''.join(secrets.choice(everything)for i in range(length))
+while True:
+    password = ''.join(secrets.choice(everything)for i in range(length))
+    if (any(c.islower() for c in password)
+            and (c.isupper() for c in password)
+            and sum(c.isdigit()for c in password) >= 3):
+        break
+
 print(password)
 
 """
