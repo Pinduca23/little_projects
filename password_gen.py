@@ -1,9 +1,16 @@
 import secrets
 import string
 
-everything = string.ascii_letters + string.digits
-length = int(input("Required size of password: "))
+everything = string.ascii_letters + string.digits + string.punctuation
+length = 0
 while True:
+    try:
+        if length < 3:
+            length = int(input("Required size of password: "))
+        else:
+            break
+    except ValueError:
+        print('Not a valid number')
     password = ''.join(secrets.choice(everything)for i in range(length))
     if (any(c.islower() for c in password)
             and (c.isupper() for c in password)
