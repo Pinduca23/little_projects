@@ -15,7 +15,7 @@ def pass_size():
                 print('Password must have at least 4 characters or words')
             else:
                 return(pass_length)
-        except:
+        except ValueError:
             print('Not a valid number')
 
 
@@ -31,12 +31,12 @@ user = {}
 
 def xkcd_password():
     # Creating XKCD passwords made up of word list from .txt
-    with open(file='D:\PyProjectLuis\little_projects\wpa2-wordlists\PlainText\words.txt') as o:
+    with open(file='PassPy\words.txt') as o:
         words = [word.strip() for word in o]
         password = ' '.join(secrets.choice(words)
                             for i in range(pass_size())).title()
-    print(password)
     user = {where_from(): password}
+    print('Your new XKCD password:', password)
     write_pass(user)
     clear()
 
@@ -52,9 +52,9 @@ def alphanumeric_pass():
                 and sum(c.isdigit() for c in password) >= 1):
             break
     user = {where_from(): password}
-    print(password)
-    write_pass(user)
     clear()
+    print('Your new password:', password)
+    write_pass(user)
 
 
 def get_password():
@@ -65,15 +65,15 @@ def get_password():
     if password == None:
         print('Password for that login doesn''t exist')
     else:
+        clear()
         print('The password for', data_from.title(),
               'is:', password)
         print('Password copied to clipboard!')
         pc.copy(password)
-        clear()
 
 
 # JSON file path where passwords area stored.
-passwords_path = 'D:\PyProjectLuis\little_projects\PassPy\passwords.json'
+passwords_path = 'PassPy\passwords.json'
 
 
 def write_pass(user):
