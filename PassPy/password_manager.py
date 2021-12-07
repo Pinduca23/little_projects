@@ -7,16 +7,14 @@ import pyperclip as pc
 
 def pass_size():
     # Gets desired password length
-    while True:
+    pass_length = int(input('\nRequired size of password: '))
+    while pass_length < 4:
         try:
+            print('\nPassword must have at least 4 characters or words')
             pass_length = int(input('\nRequired size of password: '))
-            if pass_length <= 3:
-                print('\nPassword must have at least 4 characters or words')
-            else:
-                return(pass_length)
         except ValueError:
             print('\nNot a valid number')
-
+    return(pass_length)
 
 def where_from():
     # Getting where the password is from
