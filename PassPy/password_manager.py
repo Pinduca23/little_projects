@@ -7,15 +7,14 @@ import pyperclip as pc
 
 def pass_size():
     # Gets desired password length
-    while True:
+    pass_length = int(input('\nRequired size of password: '))
+    while pass_length < 4:
         try:
+            print('\nPassword must have at least 4 characters or words')
             pass_length = int(input('\nRequired size of password: '))
-            if pass_length <= 3:
-                print('\nPassword must have at least 4 characters or words')
-            else:
-                return(pass_length)
         except ValueError:
             print('\nNot a valid number')
+    return(pass_length)
 
 
 def where_from():
@@ -73,6 +72,20 @@ def get_password():
         pc.copy(password)
 
 
+def delete_pass():
+    # Function to delete password from matching login
+    data_from = input(
+        '\nWich login/password would you like to delete?: ').upper()
+    data = read_pass()
+    login = data.get(data_from)
+    if login == None:
+        print('\nThat login doesn''t exist')
+    else:
+        del data[data_from]
+        with open(passwords_path, 'w') as file_data:
+            json.dump(data, file_data)
+
+
 # JSON file path where passwords area stored.
 passwords_path = 'PassPy\passwords.json'
 
@@ -102,3 +115,6 @@ def read_pass():
 def clear():
     # Clear the console
     os.system('cls' if os.name == 'nt' else 'clear')
+
+
+delete_pass()
