@@ -78,8 +78,7 @@ def delete_pass():
     if login == None:
         print('\nThat login doesn''t exist')
     else:
-        accept = input(
-            'Are you sure you wish to delete the password from:{}Y/n'.format(data_from)).upper()
+        accept = input(f'Are you sure you wish to delete the password from:{data_from} Y/n').upper()
         if accept == 'Y':
             del data[data_from]
             with open(passwords_path, 'w') as file_data:
