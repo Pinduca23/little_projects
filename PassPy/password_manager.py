@@ -1,26 +1,25 @@
+from base64 import decode
 import secrets
 import string
 import json
 import os
 import pyperclip as pc
+from crypt import encrypt, decrypt
 
 
 def pass_size():
     # Gets desired password length
-    pass_length = int(input('\nRequired size of password: '))
-    while pass_length < 4:
-        try:
-            print('\nPassword must have at least 4 characters or words')
-            pass_length = int(input('\nRequired size of password: '))
-        except ValueError:
-            print('\nNot a valid number')
-    return(pass_length)
-
-
-def where_from():
-    # Getting where the password is from
-    user_log = input('\nWhat is this password for?: ').upper()
-    return(user_log)
+    while True:
+        pass_length = 0
+        while pass_length < 4:
+            try:
+                pass_length = int(input('\nRequired size of password: '))
+                if pass_length <= 3:
+                    print('\nPassword must have at least 4 characters or words')
+                else:
+                    return pass_length
+            except ValueError:
+                print('\nNot a valid number')
 
 
 # Declaring user dict
@@ -34,10 +33,8 @@ def xkcd_password():
         words = [word.strip() for word in o]
         password = ' '.join(secrets.choice(words)
                             for i in range(length)).title()
-    user = {where_from(): password}
     clear()
-    print('\nYour new XKCD password:', password)
-    write_pass(user)
+    encrypt_write(password)
 
 
 def alphanumeric_pass():
@@ -51,10 +48,8 @@ def alphanumeric_pass():
             and (c.isupper() for c in password)
                 and sum(c.isdigit() for c in password) >= 3):
             break
-    user = {where_from(): password}
     clear()
-    print('\nYour new password:', password)
-    write_pass(user)
+    encrypt_write(password)
 
 
 def get_password():
@@ -66,10 +61,12 @@ def get_password():
         print('\nPassword for that login doesn''t exist')
     else:
         clear()
+        decrypted = decrypt(password)
+        decrypted = decrypted.decode('ascii')
         print('\nThe password for', data_from.title(),
-              'is:', password)
+              'is:', decrypted)
         print('\nPassword copied to clipboard!')
-        pc.copy(password)
+        pc.copy(decrypted)
 
 
 def delete_pass():
@@ -81,9 +78,14 @@ def delete_pass():
     if login == None:
         print('\nThat login doesn''t exist')
     else:
-        del data[data_from]
-        with open(passwords_path, 'w') as file_data:
-            json.dump(data, file_data)
+        accept = input(
+            'Are you sure you wish to delete the password from:{}Y/n'.format(data_from)).upper()
+        if accept == 'Y':
+            del data[data_from]
+            with open(passwords_path, 'w') as file_data:
+                json.dump(data, file_data)
+        else:
+            ()
 
 
 # JSON file path where passwords area stored.
@@ -117,4 +119,13 @@ def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 
-delete_pass()
+def encrypt_write(password):
+    user_log = input('\nWhat is this password for?: ').upper()
+    print('\nYour new password:\n', password)
+    password_bytes = password.encode('ascii')
+    encrypted = encrypt(password_bytes)
+    user = {user_log: encrypted}
+    write_pass(user)
+
+alphanumeric_pass()
+get_password()
