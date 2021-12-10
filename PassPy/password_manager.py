@@ -1,46 +1,36 @@
 import secrets
 import string
 import json
-import os
 import pyperclip as pc
+from crypt import encrypt, decrypt
 
 
 def pass_size():
     # Gets desired password length
-    pass_length = int(input('\nRequired size of password: '))
-    while pass_length < 4:
-        try:
-            print('\nPassword must have at least 4 characters or words')
-            pass_length = int(input('\nRequired size of password: '))
-        except ValueError:
-            print('\nNot a valid number')
-    return(pass_length)
+    while True:
+        pass_length = 0
+        while pass_length < 4:
+            try:
+                pass_length = int(input('\nRequired size of password: '))
+                if pass_length <= 3:
+                    print('\nPassword must have at least 4 characters or words')
+                else:
+                    return pass_length
+            except ValueError:
+                print('\nNot a valid number')
 
 
-def where_from():
-    # Getting where the password is from
-    user_log = input('\nWhat is this password for?: ').upper()
-    return(user_log)
-
-
-# Declaring user dict
-user = {}
-
-
-def xkcd_password():
+def xkcd_password(auth_user):
     # Creating XKCD passwords made up of word list from .txt
     length = pass_size()
     with open(file='PassPy\words.txt') as o:
         words = [word.strip() for word in o]
         password = ' '.join(secrets.choice(words)
                             for i in range(length)).title()
-    user = {where_from(): password}
-    clear()
-    print('\nYour new XKCD password:', password)
-    write_pass(user)
+    encrypt_write(password, auth_user)
 
 
-def alphanumeric_pass():
+def alphanumeric_pass(auth_user):
     # Creating passwords from numbers/letters/symbols
     length = pass_size()
     while True:
@@ -51,70 +41,92 @@ def alphanumeric_pass():
             and (c.isupper() for c in password)
                 and sum(c.isdigit() for c in password) >= 3):
             break
-    user = {where_from(): password}
-    clear()
-    print('\nYour new password:', password)
-    write_pass(user)
+    encrypt_write(password, auth_user)
 
 
-def get_password():
+def get_password(auth_user):
     # Function to get passwords
     data_from = input('Which password would you like to see? \n').upper()
-    data = read_pass()
-    password = data.get(data_from)
-    if password == None:
-        print('\nPassword for that login doesn''t exist')
-    else:
-        clear()
-        print('\nThe password for', data_from.title(),
-              'is:', password)
-        print('\nPassword copied to clipboard!')
-        pc.copy(password)
+    f = open('PassPy/passwords.json', 'r')
+    data = json.loads(f.read())
+    user_data = data.get(auth_user)
+    while True:
+        for i in user_data:
+            if data_from == i:
+                password = data[auth_user][data_from]
+                decrypted = decrypt(password)
+                decrypted = decrypted.decode('utf-8')
+                print('\nThe password for', data_from.title(),
+                      'is:', decrypted)
+                print('\nPassword copied to clipboard!')
+                pc.copy(decrypted)
+        print(f"There's no password for {data_from.title()} service")
+        break
 
 
-def delete_pass():
+def delete_pass(auth_user):
     # Function to delete password from matching login
     data_from = input(
         '\nWich login/password would you like to delete?: ').upper()
-    data = read_pass()
-    login = data.get(data_from)
-    if login == None:
+    f = open(passwords_path, 'r')
+    data = json.load(f)
+    user_data = data.get(auth_user)
+    while True:
+        for i in user_data:
+            if data_from == i:
+                accept = input(
+                    f'Are you sure you wish to delete the password from:{data_from.title()} Y/n: ').upper()
+                if accept == 'Y':
+                    del user_data[data_from]
+                    with open(passwords_path, 'w') as file_data:
+                        json.dump(data, file_data, ensure_ascii=True, indent=4)
+                        break
         print('\nThat login doesn''t exist')
-    else:
-        del data[data_from]
-        with open(passwords_path, 'w') as file_data:
-            json.dump(data, file_data)
+        break
 
 
 # JSON file path where passwords area stored.
 passwords_path = 'PassPy\passwords.json'
 
 
-def write_pass(user):
-    # Function designed to write passwords.json
-    try:
-        with open(passwords_path, 'r+', encoding='utf-8') as f:
-            data = json.load(f)
-            data.update(user)
-            f.seek(0)
-            json.dump(data, f, ensure_ascii=True, indent=4)
-        f.close()
-    except FileNotFoundError:
-        with open(passwords_path, 'w') as nf:
-            json.dump(user, nf, ensure_ascii=True, indent=4)
+def encrypt_write(password, auth_user):
+    # Function to write encrypted passwords to JSON
+    while True:
+        user_log = input('\nWhat is this password for?: ').upper()
+        if unique_pass(auth_user, user_log) == True:
+            print(f"The password for {user_log.title()} already exists")
+            break
+        print(f'\nYour new password: {password}\n')
+        encrypted = encrypt(password.encode('utf-8'))
+        user = {user_log: encrypted}
+        user_pass = {auth_user: user}
+        try:
+            with open(passwords_path, 'r+', encoding='utf-8', newline='') as f:
+                pass_data = json.load(f)
+                for user_in_file in pass_data:
+                    if user_in_file == auth_user:
+                        pass_data[auth_user][user_log] = encrypted
+                f.seek(0)
+                f.write(json.dumps(pass_data, ensure_ascii=True, indent=4))
+                break
+        except FileNotFoundError:
+            with open(passwords_path, 'w') as nf:
+                json.dump(user_pass, nf, ensure_ascii=True, indent=4)
+                nf.close()
+            break
 
 
-def read_pass():
-    # Function to read passwords.json
-    f = open(passwords_path, 'r')
-    data = json.loads(f.read())
-    f.close()
-    return data
+def unique_pass(auth_user, data_from):
+    # Function to check if passwords already exists while writting
+    with open(passwords_path, 'r+', encoding='utf-8', newline='') as f:
+        data = json.load(f)
+        user_data = data.get(auth_user)
+        while True:
+            for i in user_data:
+                if data_from == i:
+                    return True
+                return False
+            break
 
-
-def clear():
-    # Clear the console
-    os.system('cls' if os.name == 'nt' else 'clear')
-
-
-delete_pass()
+# auth_user = 'ramon'
+# delete_pass(auth_user)
