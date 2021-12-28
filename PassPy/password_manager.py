@@ -25,7 +25,7 @@ def pass_size():
 def xkcd_password(auth_user):
     # Creating XKCD passwords made up of word list from .txt
     length = pass_size()
-    with open(file="PassPy/words.txt") as o:
+    with open(file="words.txt") as o:
         words = [word.strip() for word in o]
         password = " ".join(
             secrets.choice(words) for i in range(length)
@@ -50,13 +50,13 @@ def alphanumeric_pass(auth_user):
 
 def get_password(auth_user):
     # Function to get passwords
-    data_from = input("Which password would you like to see? \n").upper()
+    data_from = input("\nWhich password would you like to see? ").upper()
     f = open(passwords_path, "r")
     data = json.loads(f.read())
     user_data = data.get(auth_user)
     while True:
-        for i in user_data:
-            if data_from == i:
+        for passwords in user_data:
+            if data_from == passwords:
                 password = data[auth_user][data_from]
                 decrypted = decrypt(password)
                 decrypted = decrypted.decode("utf-8")
@@ -65,8 +65,10 @@ def get_password(auth_user):
                 )
                 print("\nPassword copied to clipboard!")
                 pc.copy(decrypted)
-        break
-    print(f"There's no password for {data_from.title()} service")
+                return False
+        else:
+            print(f"\nThere's no password for {data_from.title()} service")
+            return False
 
 
 def delete_pass(auth_user):
@@ -74,13 +76,13 @@ def delete_pass(auth_user):
     data_from = input(
         "\nWich login/password would you like to delete?: "
     ).upper()
-    # unique_pass(auth_user, data_from)
+    # is_unique_pass(auth_user, data_from)
     f = open(passwords_path, "r")
     data = json.load(f)
     user_data = data.get(auth_user)
     while True:
-        for i in user_data:
-            if data_from == i:
+        for passwords in user_data:
+            if data_from == passwords:
                 accept = input(
                     f"Are you sure you wish to delete the password from:{data_from.title()} Y/n: "
                 ).upper()
@@ -93,11 +95,13 @@ def delete_pass(auth_user):
                 else:
                     print("\nNot a valid option")
                 break
-
+        else:
+            print("\n That login/passwords does not exist")
+            return False
 
 
 # JSON file path where passwords area stored.
-passwords_path = "PassPy/passwords.json"
+passwords_path = "passwords.json"
 
 
 def encrypt_write(password, auth_user):
@@ -105,9 +109,9 @@ def encrypt_write(password, auth_user):
     while True:
         data_from = input("\nWhat is this password for?: ").upper()
         try:
-            is_ok = unique_pass(auth_user, data_from)
-            if is_ok is True:
-                print(f"The password for {data_from.title()} already exists")
+            is_ok = is_unique_pass(auth_user, data_from)
+            if is_ok is False:
+                print(f"\nThe password for {data_from.title()} already exists")
                 break
         except FileNotFoundError:
             pass
@@ -130,23 +134,20 @@ def encrypt_write(password, auth_user):
             break
 
 
-def unique_pass(auth_user, data_from):
+def is_unique_pass(auth_user, input_password):
     # Function to check if passwords already exists while writting
     with open(passwords_path, "r", encoding="utf-8", newline="") as f:
         data = json.load(f)
-        user_data = data.get(auth_user.upper())
-        while True:
-            for i in user_data:
-                if i == data_from:
-                    is_ok = True
-                    break
-                else:
-                    is_ok = False
-            return is_ok
+        user_passwords = data.get(auth_user)
+        for password in user_passwords:
+            if password == input_password:
+                return False
+        else:
+            return True
 
 
-# auth_user = "ramon"
+# auth_user = "plinio"
 # delete_pass(auth_user)
 # alphanumeric_pass(auth_user)
-# get_password(auth_user)
-# print(unique_pass(auth_user, 'REDDIT'))
+# et_password(auth_user)
+# print(is_unique_pass('SOUZA', 'MU ONLINE'))

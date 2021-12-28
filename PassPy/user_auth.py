@@ -1,7 +1,7 @@
 import json
 from crypt import encrypt, decrypt
 
-path = "PassPy/auth_user.json"
+path = "auth_user.json"
 
 
 def get_user():
@@ -20,28 +20,62 @@ def get_user():
                 print("Your login/password is wrong.")
                 return False, auth_username
     except FileNotFoundError:
-        print("File doesn't exist")
+        print("\nFile doesn't exist")
 
 
 def create_user():
     username = input("Desired login: ").upper()
     password = input("Desired password: ")
     password2 = input("Repeat password: ")
-    if password == password2:
-        encrypted = encrypt(password.encode("utf-8"))
-        user = {username: encrypted}
-        try:
-            with open(path, "r+", encoding="utf-8") as f:
-                data = json.load(f)
-                data.update(user)
-                f.seek(0)
-                json.dump(data, f, ensure_ascii=True, indent=4)
-        except FileNotFoundError:
-            with open(path, "w") as nf:
-                json.dump(user, nf, ensure_ascii=True, indent=4)
-    else:
-        print("\nPasswords don't match")
+    try:
+        is_ok = is_unique_user(username)
+        if is_ok is True:
+            if password == password2:
+                encrypted = encrypt(password.encode("utf-8"))
+                user = {username: encrypted}
+                with open(path, "r+", encoding="utf-8") as f:
+                    data = json.load(f)
+                    data.update(user)
+                    f.seek(0)
+                    json.dump(data, f, ensure_ascii=True, indent=4)
+                    write_user(username)
+            else:
+                print("\nPasswords don't match")
+        else:
+            print("\nThat user already exists")
+    except FileNotFoundError:
+        with open(path, "w") as nf:
+            encrypted = encrypt(password.encode("utf-8"))
+            user = {username: encrypted}
+            json.dump(user, nf, ensure_ascii=True, indent=4)
+            write_user(username)
+
+
+def write_user(user):
+    empty_dict = {}
+    user_write = {user: empty_dict}
+    try:
+        with open("passwords.json", "r+", encoding="utf-8") as r:
+            pass_data = json.load(r)
+            pass_data.update(user_write)
+            r.seek(0)
+            r.write(json.dumps(pass_data, indent=4, ensure_ascii=True))
+    except FileNotFoundError:
+        with open("passwords.json", "w") as fnf:
+            json.dump(user_write, fnf, ensure_ascii=True, indent=4)
+
+
+def is_unique_user(username):
+    # Function to check if passwords already exists while writting
+    with open(path, "r", encoding="utf-8", newline="") as f:
+        data = json.load(f)
+        for user in data:
+            if user == username:
+                return False
+        else:
+            return True
 
 
 # create_user()
-# get_user()
+# print(is_unique_user('PINDUCA'))
+# is_unique_user('PLINIO')

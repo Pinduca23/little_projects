@@ -62,9 +62,35 @@ Then with time a tried adding some "complexity" to the project, you could create
 
 # The real challenge
 
-It started when i tried adding encryption to the passwords, where i had to learn how it worked, how it's usually stored in servers (even though here i save them in JSON files).
+It started when i tried adding encryption to the passwords, where i had to learn how it worked, how it's usually stored in servers (even though here i save them in JSON files and the encryption key is shown in ´crypt´ file).
 
-This part it' still a work in progress :D
+In this project i'm "simulating" my database in a JSON file, i know it's not standard practice and i'm doing it just for the exercise.
 
+After a lot of trial and error i managed to make everything work.
+
+To run the script you're suposed to execute the ´menu.py´, from there you're prompted with 2 choices. 
+```
+What do you wish to do?
+
+    1 - Create a new user.
+    2 - Login
+    (Anything else to exit)
+```
+Choosing to create a new user creates a file called ´auth_user.json´ and ´passwords.json´ with auth_user beign where i store each "authorized user" and passwords where the service/passwords are stored for each user.
+
+After creating a user you can Login and create(XKCD, alphanumeric), view or delete your passwords through this menu:
+```
+Please choose what you would like to do.
+
+    1 - Generate a alphanumeric password
+    2 - Generate a XKCD style password
+    3 - View a password
+    4 - Delete a password
+    E - Exit program
+```
+
+I think i'm done with this one for now, any comments regarding best practices in my code are welcome.
+
+And i wanted to thank @plinioh for all the help he gave during this project.
 
 Back to my [Main Page](https://github.com/Pinduca23)
