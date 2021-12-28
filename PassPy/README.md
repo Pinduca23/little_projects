@@ -68,7 +68,7 @@ In this project i'm "simulating" my database in a JSON file, i know it's not sta
 
 After a lot of trial and error i managed to make everything work.
 
-To run the script you're suposed to execute the ´menu.py´, from there you're prompted with 2 choices. 
+To run the script you're suposed to execute the `menu.py`, from there you're prompted with 2 choices. 
 ```
 What do you wish to do?
 
@@ -76,7 +76,7 @@ What do you wish to do?
     2 - Login
     (Anything else to exit)
 ```
-Choosing to create a new user creates a file called ´auth_user.json´ and ´passwords.json´ with auth_user beign where i store each "authorized user" and passwords where the service/passwords are stored for each user.
+Choosing to create a new user creates a file called `auth_user.json` and `passwords.json` with auth_user beign where i store each "authorized user" and passwords where the service/passwords are stored for each user.
 
 After creating a user you can Login and create(XKCD, alphanumeric), view or delete your passwords through this menu:
 ```
